@@ -1,22 +1,28 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-struct Sudoko
+class Sudoku
 {
+private:
+    vector<vector<char>> board;
     bool rowCache[10][10], colCache[10][10], gridCache[10][10][10];
 
-    bool solve(vector<vector<char>> &board)
+public:
+    void solve()
     {
-        if (isValidSudoku(board) == false)
+        if (isValidSudoku() == false)
         {
-            return false;
+            cout << "Not a valid Sudoku!";
+            return;
         }
 
-        solveSudoku(board);
-        return true;
+        solveSudoku();
+        print();
+        return;
     }
 
-    void solveSudoku(vector<vector<char>> &board)
+private:
+    void solveSudoku()
     {
 
         memset(rowCache, 0, sizeof rowCache);
@@ -29,15 +35,15 @@ struct Sudoko
             {
                 if (board[i][j] != '.')
                 {
-                    updateCache(i, j, board, true);
+                    updateCache(i, j, true);
                 }
             }
         }
 
-        backtrack(0, 0, board);
+        backtrack(0, 0);
     }
 
-    void updateCache(int i, int j, vector<vector<char>> &board, bool value)
+    void updateCache(int i, int j, bool value)
     {
         int num = board[i][j] - '0';
         rowCache[i][num] = value;
@@ -45,33 +51,33 @@ struct Sudoko
         gridCache[(i / 3) * 3][(j / 3) * 3][num] = value;
     }
 
-    bool backtrack(int row, int col, vector<vector<char>> &board)
+    bool backtrack(int row, int col)
     {
         if (col == 9)
-            return backtrack(row + 1, 0, board);
+            return backtrack(row + 1, 0);
 
         if (row == 9)
             return true;
 
         if (board[row][col] != '.')
-            return backtrack(row, col + 1, board);
+            return backtrack(row, col + 1);
 
         for (char num = '1'; num <= '9'; num++)
         {
 
             board[row][col] = num;
 
-            if (isSafe(row, col, board))
+            if (isSafe(row, col))
             {
                 board[row][col] = num;
 
-                updateCache(row, col, board, true);
+                updateCache(row, col, true);
 
-                bool isSolvable = backtrack(row, col + 1, board);
+                bool isSolvable = backtrack(row, col + 1);
                 if (isSolvable)
                     return true;
 
-                updateCache(row, col, board, false);
+                updateCache(row, col, false);
             }
 
             board[row][col] = '.';
@@ -80,7 +86,7 @@ struct Sudoko
         return false;
     }
 
-    bool isSafe(int row, int col, vector<vector<char>> const &board)
+    bool isSafe(int row, int col)
     {
         int num = board[row][col] - '0';
 
@@ -96,7 +102,7 @@ struct Sudoko
         return true;
     }
 
-    bool isValidSudoku(vector<vector<char>> const &board)
+    bool isValidSudoku()
     {
 
         memset(rowCache, 0, sizeof rowCache);
@@ -124,12 +130,37 @@ struct Sudoko
 
         return true;
     }
+
+public:
+    void read()
+    {
+        vector<vector<char>> board(9, vector<char>(9));
+        for (int i = 0; i < 9; i++)
+        {
+            for (int j = 0; j < 9; j++)
+            {
+                cin >> board[i][j];
+                if (board[i][j] < '1' or board[i][j] > '9')
+                    board[i][j] = '.';
+            }
+        }
+
+        this->board = board;
+    }
+
+    void print()
+    {
+        for (int i = 0; i < 9; i++)
+        {
+            for (int j = 0; j < 9; j++)
+                cout << board[i][j] << " ";
+            cout << endl;
+        }
+    }
 };
 
 int main()
 {
-    vector<vector<char>> board(9, vector<char>(9));
-
     /*
     Sample Input:
     
@@ -145,32 +176,9 @@ int main()
     
     */
 
-    for (int i = 0; i < 9; i++)
-    {
-        for (int j = 0; j < 9; j++)
-        {
-            cin >> board[i][j];
-            if (board[i][j] < '1' or board[i][j] > '9')
-                board[i][j] = '.';
-        }
-    }
-
-    Sudoko sudoko;
-    bool solved = sudoko.solve(board);
-
-    if (solved)
-    {
-        for (int i = 0; i < 9; i++)
-        {
-            for (int j = 0; j < 9; j++)
-                cout << board[i][j] << " ";
-            cout << endl;
-        }
-    }
-    else
-    {
-        cout << "Invalid Sudoku!";
-    }
+    Sudoku sudoku;
+    sudoku.read();
+    sudoku.solve();
 
     return 0;
 }
